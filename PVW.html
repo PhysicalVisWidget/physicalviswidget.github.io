@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Designing Visualization Widgets for Tangible Data Exploration</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
+
+  <style>
+    /* ===============  Warm Neumorphism Tokens (tuned)  =============== */
+    :root {
+      /* ---------- Soft Warm Neumorphism Palette ---------- */
+      --bg:            #f2f0eb;     /* 更柔的米白 */
+      --elevated:      #ffffff;     /* 卡片/按钮 */
+      --txt-primary:   #3c352e;     /* 略微偏暖的深棕 */
+      --txt-secondary: #867c6d;     /* 次级文字 */
+      --accent:        #d17a5e;     /* 降低饱和度的陶土橙 */
+      --shadow-dark:   rgba(210,200,185,.55); /* 暖灰暗影 (≈10% 更深) */
+      --shadow-light:  #ffffff;     /* 顶左高光 */
+      --radius-lg:     14px;
+      --radius-md:     10px;
+      --transition-fast: .2s ease;
+    }
+
+    /* ===============  Base / Reset  =============== */
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      margin: 0;
+      padding: 0;
+      color: var(--txt-primary);
+      overflow-x: hidden;
+    }
+
+    a { color: var(--accent); text-decoration: underline; }
+
+    /* ===============  Neumorphism helpers  =============== */
+    .neu-flat {
+      background: var(--elevated);
+      border-radius: var(--radius-md);
+      box-shadow: 9px 9px 16px var(--shadow-dark),
+                  -9px -9px 16px var(--shadow-light);
+      transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+    }
+    .neu-inset {
+      background: var(--elevated);
+      border-radius: var(--radius-md);
+      box-shadow: inset 6px 6px 10px var(--shadow-dark),
+                  inset -6px -6px 10px var(--shadow-light);
+    }
+
+    /* raised style for un-selected selects */
+    .neu-select-default {
+      background: var(--elevated);
+      border-radius: var(--radius-md);
+      box-shadow: 6px 6px 12px var(--shadow-dark),
+                  -6px -6px 12px var(--shadow-light);
+    }
+
+    /* 交互 lift（静态元素用 .static 覆盖） */
+    .neu-flat:hover { transform: translateY(-2px); }
+    .neu-flat:active {
+      box-shadow: inset 6px 6px 12px var(--shadow-dark),
+                  inset -6px -6px 12px var(--shadow-light);
+      transform: translateY(2px);
+    }
+
+    /* 被按下(选中)的恒定样式 */
+    .pressed {
+      box-shadow: inset 6px 6px 12px var(--shadow-dark),
+                  inset -6px -6px 12px var(--shadow-light) !important;
+      transform: translateY(2px) !important;
+    }
+    .pressed:hover { transform: translateY(2px) !important; }
+
+    /* 静态 surface（无 hover/active）*/
+    .static { cursor: default; }
+    .static.neu-flat:hover,
+    .static.neu-flat:active {
+      transform: none;
+      box-shadow: 9px 9px 16px var(--shadow-dark),
+                  -9px -9px 16px var(--shadow-light);
+    }
+
+    /* ===============  Header & Navbar  =============== */
+    .header-container {
+      position: fixed;
+      top: 0; left: 0; width: 100%;
+      background: var(--bg);
+      z-index: 9999;
+      padding-bottom: 12px;
+      box-shadow: 0 6px 14px rgba(0,0,0,.04);
+    }
+    .header { text-align: center; padding: 18px 10px 12px; }
+    .header h1 { font-size: 1.8rem; font-weight: 700; margin: 0; }
+    .authors { font-style: italic; color: var(--txt-secondary); margin: 4px 0 0; }
+
+    /* Navbar */
+    .navbar {
+      display: flex; justify-content: center; flex-wrap: wrap;
+      gap: 12px; margin-top: 14px;
+    }
+    .navbar button {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 18px; font-size: 1rem; font-weight: bold;
+      border: none; color: var(--txt-primary);
+      background: var(--elevated); border-radius: var(--radius-lg);
+      cursor: pointer;
+      box-shadow: 6px 6px 12px var(--shadow-dark),
+                  -6px -6px 12px var(--shadow-light);
+      transition: var(--transition-fast);
+    }
+    .icon-placeholder { width: 18px; text-align: center; }
+
+    /* Teaser (静态) */
+    .teaser {
+      background: var(--elevated);
+      border-radius: var(--radius-lg);
+      box-shadow: 9px 9px 16px var(--shadow-dark),
+                  -9px -9px 16px var(--shadow-light);
+      padding: 16px;
+      width: 65%;            /* --- requirement #3 --- */
+      max-width: 65%;
+      height: auto; margin: 0 auto 20px; display: block;
+    }
+
+    /* Layout */
+    /* top offset handled via JS so no hard-coded padding */
+    .content-wrapper {
+      width: 100%;
+    }
+    .layout-outer {
+      display: flex; flex-wrap: wrap; justify-content: space-between;
+      width: 95%; margin: 0 auto;
+    }
+    .left-gap, .middle-gap, .right-gap { flex: 1 1 5%; max-width: 5%; }
+
+    /* Result cards */
+    .results-table-container { flex: 1 1 65%; display: flex; flex-direction: column; gap: 20px; }
+    .card {
+      background: var(--elevated);
+      border-radius: var(--radius-lg);
+      box-shadow: 9px 9px 16px var(--shadow-dark),
+                  -9px -9px 16px var(--shadow-light);
+      padding: 16px;
+      display: flex; align-items: center; gap: 5%;
+      height: 8vw; transition: var(--transition-fast);
+    }
+    .card:hover { transform: translateY(-3px); }
+
+    .card-index { font-size: 1.1rem; font-weight: bold; color: #a39582; margin-right: 10px; flex-shrink: 0; width: 20px; }
+    .card img { width: 20%; height: auto; max-height: 100%; object-fit: contain;
+                flex-shrink: 0; border-radius: var(--radius-md);
+                box-shadow: 3px 3px 6px var(--shadow-dark),
+                            -3px -3px 6px var(--shadow-light); }
+    .card-content {
+      width: 75%;
+    }
+
+    .card-text {
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 4; /* 控制标题和作者显示行数 */
+      -webkit-box-orient: vertical;
+      text-overflow: ellipsis;
+    }
+
+    .results-table-container.exploration-active .card.expanded .card-text {
+      overflow: visible;
+      display: block;
+      -webkit-line-clamp: none;
+    }
+    .card-title   { font-weight: 700; font-size: 1rem; margin-bottom: 6px; text-decoration: underline; }
+    .card-authors { font-size: 0.85rem; color: var(--txt-secondary); margin-bottom: 6px; }
+
+    /* Exploration mode image styles */
+    /* Exploration mode image styles */
+    .results-table-container.exploration-active .card img {
+      border-radius: 0;
+      box-shadow: none;
+      background: transparent;
+    }
+
+    /* 添加探索模式下卡片固定高度和文本溢出处理 */
+    .results-table-container.exploration-active .card {
+      height: 150px; /* 固定卡片高度 */
+      transition: height 0.3s ease;
+    }
+
+    .results-table-container.exploration-active .card.expanded {
+      height: auto; /* 自适应高度以显示完整内容 */
+    }
+
+    .results-table-container.exploration-active .card.expanded .card-content {
+      overflow: visible;
+      display: block;
+      -webkit-line-clamp: none;
+    }
+
+    .card-icons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    /* 展开状态下的图标布局 - 一行3个 */
+    .results-table-container.exploration-active .card.expanded .card-icons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .card-icon {
+      width: 30px;
+      height: 30px;
+      background-color: #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--txt-secondary);
+      box-shadow: inset 2px 2px 4px var(--shadow-dark),
+                  inset -2px -2px 4px var(--shadow-light);
+      border-radius: 4px;
+    }
+    .card-content {
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 4; /* 显示多少行后截断 */
+      -webkit-box-orient: vertical;
+      text-overflow: ellipsis;
+    }
+
+    /* Filter sidebar */
+    .filter-bar {
+      flex: 1 1 20%; background: var(--elevated);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: 9px 9px 16px var(--shadow-dark),
+                  -9px -9px 16px var(--shadow-light);
+      height: fit-content; min-width: 200px;
+    }
+
+    /* 添加筛选栏悬浮样式 */
+    .filter-bar.sticky {
+      position: sticky;
+      overflow-y: auto;
+      /* 位置和高度将通过JS动态设置 */
+      /* 添加滚动条样式优化 */
+      scrollbar-width: thin;
+      scrollbar-color: var(--txt-secondary) transparent;
+    }
+
+    /* 自定义滚动条样式 */
+    .filter-bar.sticky::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .filter-bar.sticky::-webkit-scrollbar-thumb {
+      background-color: var(--txt-secondary);
+      border-radius: 3px;
+    }
+    .filter-bar h3 { margin-top: 0; text-align:center; }
+
+    .filter-section { margin-bottom: 26px; padding-bottom: 16px; border-bottom: 1px solid #e8e3dc; }
+    .filter-section h4 { margin: 0 0 14px; font-weight: bold; }
+
+    .filter-item { display:flex; flex-direction:column; margin-bottom: 14px; }
+    .filter-item label { font-size: .9rem; margin-bottom: 4px; }
+
+    .title-reset-container { display: flex; align-items: center; gap: 8px; }
+
+    .filter-select,
+    .paper-title-input {
+      width: 100%; padding: 8px 10px;
+      font-family: 'JetBrains Mono', monospace; border: none;
+      background: var(--elevated); border-radius: var(--radius-md);
+      box-shadow: inset 4px 4px 8px var(--shadow-dark),
+                  inset -4px -4px 8px var(--shadow-light);
+      appearance: none; outline: none;
+    }
+    .filter-select:focus,
+    .paper-title-input:focus {
+      box-shadow: inset 2px 2px 6px var(--shadow-dark),
+                  inset -2px -2px 6px var(--shadow-light);
+    }
+
+    .reset-btn {
+      padding: 8px 14px; font-weight: bold; border: none;
+      color: var(--txt-primary); background: var(--elevated);
+      border-radius: var(--radius-md); cursor: pointer;
+      box-shadow: 6px 6px 12px var(--shadow-dark),
+                  -6px -6px 12px var(--shadow-light);
+      transition: var(--transition-fast);
+    }
+    .reset-btn:hover  { transform: translateY(-2px); }
+    .reset-btn:active {
+      box-shadow: inset 4px 4px 8px var(--shadow-dark),
+                  inset -4px 4px 8px var(--shadow-light);
+      transform: translateY(2px);
+    }
+
+    /* Home-page text */
+    .text-content {
+      width: 80%; margin: 0 auto;
+      font-size: 0.95rem; line-height: 1.6; text-align: justify;
+      background: var(--elevated); border-radius: var(--radius-lg);
+      padding: 10px 10px;
+      box-shadow: 9px 9px 16px var(--shadow-dark),
+                  -9px -9px 16px var(--shadow-light);
+    }
+
+    /* Responsive */
+    @media screen and (max-width: 800px) {
+      .layout-outer { flex-direction: column; align-items: center; }
+      .left-gap, .middle-gap, .right-gap { display: none; }
+      .results-table-container, .filter-bar { width: 90% !important; }
+      .text-content { width: 90%; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- =============== HEADER =============== -->
+  <div class="header-container">
+    <div class="header">
+      <h1>Designing Visualization Widgets for Tangible Data Exploration:</h1>
+      <h1>A Systematic Review</h1>
+      <p class="authors">Haonan Yao, Lingyun Yu, Lijie Yao</p>
+    </div>
+
+    <img src="Resources/Teaser.jpg" class="teaser neu-flat static" alt="Teaser">
+
+    <div class="navbar">
+      <!-- data-tab 用于本地切换；data-link 外链按钮 -->
+      <button class="neu-flat" data-tab="home"><span class="icon-placeholder">🏠</span>Home Page</button>
+      <button class="neu-flat" data-tab="explore"><span class="icon-placeholder">🔭</span>Exploration</button>
+      <button class="neu-flat" data-link="https://example.com/paper"  ><span class="icon-placeholder">📄</span>Paper</button>
+      <button class="neu-flat" data-link="https://osf.io/vjw5e/"       ><span class="icon-placeholder">📁</span>OSF</button>
+      <button class="neu-flat" data-link="mailto:haonanyao0622@gmail.com"><span class="icon-placeholder">📧</span>Contact</button>
+    </div>
+  </div>
+
+  <!-- =============== MAIN CONTENT =============== -->
+  <div class="content-wrapper">
+    <!-- Exploration -->
+    <div class="layout-outer" id="exploreSection">
+      <div class="left-gap"></div>
+
+      <div class="results-table-container" id="resultsContainer">
+        <p>Loading...</p>
+      </div>
+
+      <div class="middle-gap"></div>
+
+      <div class="filter-bar neu-flat static">
+        <h3>Filter</h3>
+
+        <div class="instance-count-container">
+          <p>Number of instances:</p>
+          <span id="instanceCount">0 / 0</span>
+        </div>
+
+        <div class="filter-section">
+          <br>
+          <h4>Search:</h4>
+          <div class="title-reset-container">
+            <input type="text" id="paperTitleSearch" placeholder="Search by keywords..." class="paper-title-input neu-inset">
+            <button id="resetFilters" class="reset-btn">Reset</button>
+          </div>
+        </div>
+
+        <div id="filterOptions"></div>
+      </div>
+
+      <div class="right-gap"></div>
+    </div>
+
+    <!-- Home Page -->
+    <div id="textSection" style="display:none">
+      <div class="text-content">
+        <h3 class="card-title" style="font-size: 1rem; font-weight: bold; color: var(--txt-primary); margin-top: 0; text-decoration: none; font-family: Arial">Abstract</h3>
+        <p>
+          We present a systematic review on tasks, interactions, and visualization widgets in the context of tangible data exploration.
+          Tangible widgets have been shown to reduce cognitive load, enable more natural interactions, and support the completion of complex data exploration tasks.
+          Yet, the field lacks a structured understanding of how task types, interaction methods, and widget designs are coordinated, limiting the ability to identify recurring design patterns and opportunities for innovation.
+          To address this gap, we conduct a systematic review to analyze existing work and characterize the current design of data exploration tasks, interactions, and tangible visualization widgets.
+          We next reflect based on our findings and propose a research agenda to inform the development of a future widget design toolkit for tangible data exploration.
+          Our systematic review and supplemental materials are available at <a href="https://osf.io/vjw5e/">osf.io/vjw5e/</a>.
+        </p>
+      </div>
+
+      <div class="text-content" style="margin-top: 20px">
+        <h3 class="card-title" style="font-size: 1rem; font-weight: bold; color: var(--txt-primary); margin-top: 0; text-decoration: none; font-family: Arial">Categorization</h3>
+        <p>
+          <img src="Resources/Icons/TaskEntity.jpg" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;"><strong style="color: rgb(80,79,114);">Tasks</strong> describe in which environment the data exploration tasks have been conducted (<em>Task environment</em>), what the task content is (<em>Task content</em>), and in which representation the task entity has been perceived by users (<em>Task entity's representation</em>).<br>
+          <img src="Resources/Icons/UserInteraction.jpg" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;"><strong style="color: rgb(82,106,96);">User Interactions</strong> describe how users operate tangible entities to complete a data exploration task (<em>Manipulation method</em>), what interactions users perform (<em>Interaction type</em>), and where interactions take place (<em>Where the interaction happens</em>).<br>
+          <img src="Resources/Icons/Widgets.jpg" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;"><strong style="color: rgb(140,95,35);">Visualization Widgets</strong> refer to tangible entities that are used to accomplish data exploration tasks through specific interactions. Here we discuss how big a widget is (<em>Size</em>), how many widgets are used (<em>Quantity</em>), the shape in which the widget acts (<em>Functional shape</em>), and the material properties of the widget (<em>Material properties</em>).<br>
+          <img src="Resources/Icons/RelativePosition.jpg" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;"><strong style="color: rgb(156,75,75);">Relative Position</strong> indicates the <em>Accessible distance between user and task entity</em>, the <em>Accessible distance between user and visualization widget(s)</em>, and the <em>Spatial integration between task entity and visualization widget(s)</em>.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============== SCRIPTS =============== -->
+  <script>
+    /* ---------- Dataset & Filters ---------- */
+    let allData = [];
+    let currentFilters = {};
+    let paperTitleSearchText = '';
+    let currentTab = 'Home Page';    // 当前页面
+
+    const groups = [
+      { title: 'Tasks', labels: ['Task Environment', 'Task Content', "Task Entity's Representation"] },
+      { title: 'User Interactions', labels: ['Manipulation Method', 'Interaction Type', 'Where the Interaction Happens'] },
+      { title: 'Visualization Widgets', labels: ['Size', 'Quantity', 'Physical Form', 'Functional Shape', 'Material Properties'] },
+      { title: 'Relative Position', labels: ['Accessible Distance between User and Visualization Widget(s)', 'Accessible Distance between User and Task Entity', 'Spatial Integration between Task Entity and Visualization Widget(s)'] }
+    ];
+
+    /* ------- 通用辅助：左键 / 中键统一触发 ------- */
+    function addUnifiedClick(el, handler) {
+      // 左键 click
+      el.addEventListener('click',  e => handler(e, /*isMiddle=*/false));
+
+      // 中键 (部分浏览器只触发 auxclick，部分只触发 mousedown)  
+      el.addEventListener('auxclick', e => {
+        if (e.button === 1) {
+          e.preventDefault();
+          handler(e, /*isMiddle=*/true);
+        }
+      });
+      el.addEventListener('mousedown', e => {
+        if (e.button === 1) {
+          e.preventDefault();
+          handler(e, /*isMiddle=*/true);
+        }
+      });
+    }
+
+    /* ------- 导航按钮“被按下”样式同步 ------- */
+    const navButtons = document.querySelectorAll('.navbar button');
+
+    function updateNavPressed() {
+      navButtons.forEach(btn => {
+        const tab = btn.dataset.tab;
+        if ((tab === 'home' && currentTab === 'Home Page') ||
+            (tab === 'explore' && currentTab === 'Exploration')) {
+          btn.classList.add('pressed');
+        } else {
+          btn.classList.remove('pressed');
+        }
+      });
+    }
+
+    /* 初始化按钮交互监听 */
+    navButtons.forEach(btn => {
+      // hover 按压动画
+      btn.addEventListener('mousedown', () => {
+        navButtons.forEach(b => b.classList.remove('pressed'));
+        btn.classList.add('pressed');
+      });
+      btn.addEventListener('mouseup',   updateNavPressed);
+      btn.addEventListener('mouseleave',updateNavPressed);
+
+      // 左键 + 中键统一导航
+      addUnifiedClick(btn, (e) => {
+        if (btn.dataset.tab) {
+          currentTab = (btn.dataset.tab === 'home') ? 'Home Page' : 'Exploration';
+          switchTab(currentTab);
+          updateNavPressed();
+        } else if (btn.dataset.link) {
+          // 外链：始终在新标签页打开
+          window.open(btn.dataset.link, '_blank');
+        }
+      });
+    });
+
+    /* middle/left-click support for Reset button */
+    addUnifiedClick(document.getElementById('resetFilters'), () => resetAllFilters());
+
+    /* ------- 页面切换 ------- */
+    function switchTab(tabName) {
+        const explore = document.getElementById('exploreSection');
+        const text    = document.getElementById('textSection');
+        const filterBar = document.querySelector('.filter-bar');
+        const resultsContainer = document.querySelector('.results-table-container');
+        
+        if (tabName === 'Home Page') {
+            explore.style.display = 'none';
+            text.style.display    = 'block';
+            filterBar.classList.remove('sticky');
+            resultsContainer.classList.remove('exploration-active');
+        } else {
+            explore.style.display = 'flex';
+            text.style.display    = 'none';
+            // 切换到探索页面时更新所有筛选选项框样式
+            document.querySelectorAll('.filter-select').forEach(select => {
+                toggleSelectStyle(select);
+            });
+            filterBar.classList.add('sticky');
+            updateFilterBarPosition(); // 更新筛选栏位置
+            resultsContainer.classList.add('exploration-active');
+        }
+        updateContentOffset(); // 添加此行以重新计算内容偏移量
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ------- Filter UI 构建 & 数据渲染 ------- */
+    function createFilterOptions() {
+      const container = document.getElementById('filterOptions');
+      container.innerHTML = '';
+      groups.forEach(group => {
+        const sec = document.createElement('div');
+        sec.className = 'filter-section';
+    
+        const title = document.createElement('h4');
+        // 添加图标和颜色
+        const icon = document.createElement('img');
+        switch(group.title) {
+          case 'Tasks':
+            icon.src = 'Resources/Icons/TaskEntity.jpg';
+            title.style.color = 'rgb(80,79,114)';
+            break;
+          case 'User Interactions':
+            icon.src = 'Resources/Icons/UserInteraction.jpg';
+            title.style.color = 'rgb(82,106,96)';
+            break;
+          case 'Visualization Widgets':
+            icon.src = 'Resources/Icons/Widgets.jpg';
+            title.style.color = 'rgb(140,95,35)';
+            break;
+          case 'Relative Position':
+            icon.src = 'Resources/Icons/RelativePosition.jpg';
+            title.style.color = 'rgb(156,75,75)';
+            break;
+        }
+        icon.style.width = '24px';
+        icon.style.height = '24px';
+        icon.style.marginRight = '8px';
+        icon.style.verticalAlign = 'middle';
+        title.appendChild(icon);
+        title.appendChild(document.createTextNode(group.title));
+        sec.appendChild(title);
+
+        group.labels.forEach(label => {
+          // 统计筛选后的数量
+          const allValues   = [...new Set(allData.map(d => d[label]))].filter(Boolean).sort();
+          const filtered    = applyCurrentFilterExcept(label);
+          const counts      = Object.fromEntries(allValues.map(v => [v, 0]));
+          filtered.forEach(d => { const v = d[label]; if (v) counts[v]++; });
+
+          // UI 容器
+          const item = document.createElement('div');
+          item.className = 'filter-item';
+
+          const lab = document.createElement('label');
+          lab.textContent = label + ':';
+          item.appendChild(lab);
+
+          const select = document.createElement('select');
+          select.className = 'filter-select';
+          select.dataset.label = label;
+          select.innerHTML = '<option value="">All</option>';
+          allValues.forEach(v => {
+            select.innerHTML += `<option value="${v}">${v} (${counts[v] || 0})</option>`;
+          });
+
+          // 当前状态
+          select.value = currentFilters[label] || '';
+          toggleSelectStyle(select);
+
+          addUnifiedClick(select, () =>{/*no-op: select handles change*/});
+          select.onchange = e => {
+            currentFilters[label] = e.target.value;
+            toggleSelectStyle(e.target);
+            applyFilters();
+          };
+
+          item.appendChild(select);
+          sec.appendChild(item);
+        });
+        container.appendChild(sec);
+      });
+    }
+
+    // 处于默认“All”时使用 raised 样式
+    function toggleSelectStyle(sel) {
+      if (sel.value === '') {
+        // 移除按下样式，添加弹起样式
+        sel.classList.remove('neu-inset');
+        sel.classList.add('neu-select-default');
+        // 强制应用弹起状态的阴影样式
+        sel.style.boxShadow = '6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light)';
+      } else {
+        // 移除弹起样式，添加按下样式
+        sel.classList.add('neu-inset');
+        sel.classList.remove('neu-select-default');
+        // 恢复按下状态的阴影样式
+        sel.style.boxShadow = 'inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light)';
+      }
+    }
+
+    const applyCurrentFilterExcept = skip =>
+      allData.filter(d =>
+        Object.entries(currentFilters).every(([k, v]) => k === skip || !v || d[k] === v) &&
+        (!paperTitleSearchText || matchesSearchText(d))
+      );
+
+    const matchesSearchText = d => {
+      const allLabels = ['Paper Name', 'Authors'].concat(...groups.map(g => g.labels));
+      return allLabels.some(l => d[l] && d[l].toLowerCase().includes(paperTitleSearchText.toLowerCase()));
+    };
+
+    function applyFilters() {
+      const filtered = allData.filter(d =>
+        Object.entries(currentFilters).every(([k, v]) => !v || d[k] === v) &&
+        (!paperTitleSearchText || matchesSearchText(d))
+      );
+      renderResults(filtered);
+      createFilterOptions();
+    }
+
+    function renderResults(data) {
+      const container = document.getElementById('resultsContainer');
+      container.innerHTML = '';
+      document.getElementById('instanceCount').textContent = `${data.length} / ${allData.length}`;
+    
+      if (!data.length) { container.innerHTML = '<p>No results found.</p>'; return; }
+    
+      data.forEach((item, idx) => {
+        const card = document.createElement('div'); 
+        card.className = 'card';
+        // 添加点击展开功能 - 关闭其他所有卡片
+        addUnifiedClick(card, () => {
+        // 移除所有卡片的展开状态
+        document.querySelectorAll('.card').forEach(c => {
+        c.classList.remove('expanded');
+        });
+        // 切换当前卡片的展开状态
+        card.classList.toggle('expanded');
+        });
+    
+        const index = document.createElement('div'); 
+        index.className = 'card-index'; 
+        index.textContent = idx + 1;
+        card.appendChild(index);
+    
+        const img = document.createElement('img');
+        img.src = `Resources/PaperImages/Instance${item.originalIndex + 1}.png`;
+        img.alt = 'Figure';
+        card.appendChild(img);
+    
+        const content = document.createElement('div'); 
+        content.className = 'card-content';
+        content.innerHTML = `
+          <div class="card-text">
+            <a class="card-title" href="${item['Paper Link'] || '#'}" target="_blank">${item['Paper Name'] || ''}</a>
+            <div class="card-authors">${item['Authors'] || ''}</div>
+          </div>
+          <div class="card-icons"></div>`;
+        card.appendChild(content);
+    
+        // 阻止标题链接的事件冒泡
+        const titleLink = content.querySelector('.card-title');
+        titleLink.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+    
+        // 添加14个示例图标
+        const iconsContainer = content.querySelector('.card-icons');
+        for (let i = 1; i <= 14; i++) {
+          const icon = document.createElement('div');
+          icon.className = 'card-icon';
+          icon.textContent = `ex${i}`;
+          iconsContainer.appendChild(icon);
+        }
+    
+        container.appendChild(card);
+      });
+    }
+
+    async function loadCSVData() {
+      const resp  = await fetch('Resources/metadata.csv');
+      // 使用arrayBuffer替代text()以显式控制编码
+      const buffer = await resp.arrayBuffer();
+      const decoder = new TextDecoder('utf-8');
+      let text = decoder.decode(buffer);
+      // 移除可能存在的UTF-8 BOM头
+      text = text.replace(/^\ufeff/, '');
+      const data  = d3.csvParse(text);
+      data.forEach((d, i) => d.originalIndex = i);
+      allData = data;
+      createFilterOptions();
+      renderResults(allData);
+    }
+
+    /* ------- 重置 ------- */
+    function resetAllFilters() {
+      currentFilters = {};
+      paperTitleSearchText = '';
+      document.getElementById('paperTitleSearch').value = '';
+      renderResults(allData);
+      createFilterOptions();
+    }
+
+    /* ------- 动态计算内容顶距 (满足需求 #4) ------- */
+    function updateContentOffset() {
+      const header = document.querySelector('.header-container');
+      const contentWrapper = document.querySelector('.content-wrapper');
+      if (header && contentWrapper) {
+        const offset = header.offsetHeight + 20; // 20px 余量
+        contentWrapper.style.marginTop = offset + 'px';
+      }
+    }
+
+    /* ------- 初始化 ------- */
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCSVData();
+
+      // 搜索输入
+      document.getElementById('paperTitleSearch').oninput = e => {
+        paperTitleSearchText = e.target.value;
+        applyFilters();
+      };
+
+      // 点击空白处关闭所有展开的卡片
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.card')) {
+          document.querySelectorAll('.card.expanded').forEach(card => {
+            card.classList.remove('expanded');
+          });
+        }
+      });
+
+      // 默认 Home Page
+      switchTab('Home Page');
+      updateNavPressed();
+    });
+
+    // 在所有资源加载完 & 窗口尺寸变化时更新顶距
+    window.addEventListener('load', updateContentOffset);
+    window.addEventListener('resize', updateContentOffset);
+
+    // 添加筛选栏位置更新函数
+    function updateFilterBarPosition() {
+      const headerHeight = document.querySelector('.header-container').offsetHeight;
+      const filterBar = document.querySelector('.filter-bar.sticky');
+      if (filterBar) {
+        filterBar.style.top = `${headerHeight}px`;
+        filterBar.style.height = `calc(100vh - ${headerHeight}px)`;
+      }
+    }
+
+    // 页面加载和窗口调整时更新筛选栏位置
+    window.addEventListener('load', updateFilterBarPosition);
+    window.addEventListener('resize', updateFilterBarPosition);
+
+    // 添加筛选栏独立滚动功能
+    const filterBar = document.querySelector('.filter-bar');
+    
+    // 跟踪鼠标是否悬停在筛选栏上
+    let isHoveringFilterBar = false;
+    
+    filterBar.addEventListener('mouseenter', () => {
+      isHoveringFilterBar = true;
+    });
+    
+    filterBar.addEventListener('mouseleave', () => {
+      isHoveringFilterBar = false;
+    });
+    
+    filterBar.addEventListener('wheel', function(e) {
+      // 只有当鼠标悬停且内容超出容器高度时才处理滚动
+      if (isHoveringFilterBar && this.scrollHeight > this.clientHeight) {
+        // 允许筛选栏滚动
+        this.scrollTop += e.deltaY;
+        // 阻止事件冒泡到页面
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, { passive: false });
+  </script>
+</body>
+</html>
