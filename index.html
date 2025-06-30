@@ -10,17 +10,16 @@
   <style>
     /* ===============  Warm Neumorphism Tokens (tuned)  =============== */
     :root {
-      /* ---------- Soft Warm Neumorphism Palette ---------- */
-      --bg:            #f2f0eb;     /* 更柔的米白 */
-      --elevated:      #ffffff;     /* 卡片/按钮 */
-      --txt-primary:   #3c352e;     /* 略微偏暖的深棕 */
-      --txt-secondary: #867c6d;     /* 次级文字 */
-      --accent:        #d17a5e;     /* 降低饱和度的陶土橙 */
-      --shadow-dark:   rgba(210,200,185,.55); /* 暖灰暗影 (≈10% 更深) */
-      --shadow-light:  #ffffff;     /* 顶左高光 */
+      --bg:            #f2f0eb;
+      --elevated:      #ffffff;
+      --txt-primary:   #3c352e;
+      --txt-secondary: #867c6d;
+      --accent:        #d17a5e;
+      --shadow-dark:   rgba(180, 170, 150, 0.5); 
+      --shadow-light:  rgba(255, 255, 255, 0.9);  
       --radius-lg:     14px;
       --radius-md:     10px;
-      --transition-fast: .2s ease;
+      --transition-fast: 0.25s ease;
     }
 
     /* ===============  Base / Reset  =============== */
@@ -40,37 +39,38 @@
     .neu-flat {
       background: var(--elevated);
       border-radius: var(--radius-md);
-      box-shadow: 9px 9px 16px var(--shadow-dark),
-                  -9px -9px 16px var(--shadow-light);
+      box-shadow: 6px 6px 12px var(--shadow-dark),
+                  -6px -6px 12px var(--shadow-light);
       transition: box-shadow var(--transition-fast), transform var(--transition-fast);
     }
+
     .neu-inset {
       background: var(--elevated);
       border-radius: var(--radius-md);
-      box-shadow: inset 6px 6px 10px var(--shadow-dark),
-                  inset -6px -6px 10px var(--shadow-light);
+      box-shadow: inset 4px 4px 6px var(--shadow-dark),
+                  inset -4px -4px 6px var(--shadow-light);
     }
 
     /* raised style for un-selected selects */
     .neu-select-default {
       background: var(--elevated);
       border-radius: var(--radius-md);
-      box-shadow: 6px 6px 12px var(--shadow-dark),
-                  -6px -6px 12px var(--shadow-light);
+      box-shadow: 4px 4px 10px var(--shadow-dark),
+                  -4px -4px 10px var(--shadow-light);
     }
 
     /* 交互 lift（静态元素用 .static 覆盖） */
     .neu-flat:hover { transform: translateY(-2px); }
     .neu-flat:active {
-      box-shadow: inset 6px 6px 12px var(--shadow-dark),
-                  inset -6px -6px 12px var(--shadow-light);
+      box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                  inset -3px -3px 6px var(--shadow-light);
       transform: translateY(2px);
     }
 
     /* 被按下(选中)的恒定样式 */
     .pressed {
-      box-shadow: inset 6px 6px 12px var(--shadow-dark),
-                  inset -6px -6px 12px var(--shadow-light) !important;
+      box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                  inset -3px -3px 6px var(--shadow-light) !important;
       transform: translateY(2px) !important;
     }
     .pressed:hover { transform: translateY(2px) !important; }
@@ -146,10 +146,24 @@
                   -9px -9px 16px var(--shadow-light);
       padding: 16px;
       display: flex; align-items: center; gap: 5%;
-      height: 8vw; transition: var(--transition-fast);
+      height: auto; 
+      overflow: hidden;
+      position: relative;
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
     }
-    .card:hover { transform: translateY(-3px); }
-
+    .card-toggle-indicator {
+      position: absolute;
+      bottom: 10px;
+      right: 16px;
+      font-size: 1.1rem;
+      color: var(--txt-secondary);
+      pointer-events: none;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 6px 6px 12px var(--shadow-dark),
+                  -6px -6px 12px var(--shadow-light);
+    }
     .card-index { font-size: 1.1rem; font-weight: bold; color: #a39582; margin-right: 10px; flex-shrink: 0; width: 20px; }
     .card img { width: 20%; height: auto; max-height: 100%; object-fit: contain;
                 flex-shrink: 0; border-radius: var(--radius-md);
@@ -172,7 +186,7 @@
       display: block;
       -webkit-line-clamp: none;
     }
-    .card-title   { font-weight: 700; font-size: 1rem; margin-bottom: 6px; text-decoration: underline; }
+    .card-title   { font-weight: 700; font-size: 1rem; margin-bottom: 6px; text-decoration: underline; color: var(--txt-primary); }
     .card-authors { font-size: 0.85rem; color: var(--txt-secondary); margin-bottom: 6px; }
 
     /* Exploration mode image styles */
@@ -199,13 +213,6 @@
       -webkit-line-clamp: none;
     }
 
-    .card-icons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
     /* 展开状态下的图标布局 - 一行3个 */
     .results-table-container.exploration-active .card.expanded .card-icons {
       display: grid;
@@ -213,19 +220,12 @@
       gap: 10px;
     }
 
-    .card-icon {
-      width: 30px;
-      height: 30px;
-      background-color: #e0e0e0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
+    .card-labels {
+      margin-top: 8px;
+      font-size: 0.85rem;
       color: var(--txt-secondary);
-      box-shadow: inset 2px 2px 4px var(--shadow-dark),
-                  inset -2px -2px 4px var(--shadow-light);
-      border-radius: 4px;
     }
+
     .card-content {
       overflow: hidden;
       display: -webkit-box;
@@ -284,8 +284,8 @@
     }
     .filter-select:focus,
     .paper-title-input:focus {
-      box-shadow: inset 2px 2px 6px var(--shadow-dark),
-                  inset -2px -2px 6px var(--shadow-light);
+      box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                  inset -3px -3px 6px var(--shadow-light);
     }
 
     .reset-btn {
@@ -298,8 +298,8 @@
     }
     .reset-btn:hover  { transform: translateY(-2px); }
     .reset-btn:active {
-      box-shadow: inset 4px 4px 8px var(--shadow-dark),
-                  inset -4px 4px 8px var(--shadow-light);
+      box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                  inset -3px -3px 6px var(--shadow-light);
       transform: translateY(2px);
     }
 
@@ -320,6 +320,96 @@
       .results-table-container, .filter-bar { width: 90% !important; }
       .text-content { width: 90%; }
     }
+
+    /* =============== Responsive for Mobile =============== */
+    @media screen and (max-width: 600px) {
+      .header h1 {
+        font-size: 1.2rem;
+      }
+
+      .navbar {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .navbar button {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+      }
+
+      .teaser {
+        width: 90%;
+        max-width: 90%;
+      }
+
+      .layout-outer {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        display: flex;
+      }
+
+      .results-table-container,
+      .filter-bar {
+        width: 95% !important;
+      }
+
+      .filter-bar {
+        padding: 14px;
+        order: -1; 
+        position: static !important; 
+        height: auto !important;   
+        top: auto !important;       
+        overflow: visible !important; 
+      }
+
+      .filter-bar h3,
+      .filter-bar h4 {
+        font-size: 1rem;
+        text-align: left;
+      }
+
+      .filter-item label,
+      .filter-select,
+      .paper-title-input {
+        font-size: 0.9rem;
+      }
+
+      .reset-btn {
+        padding: 6px 10px;
+        font-size: 0.9rem;
+      }
+
+      .card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .card img {
+        width: 100%;
+        max-height: none;
+        object-fit: cover;
+      }
+
+      .card-content {
+        width: 100%;
+      }
+
+      .card-index {
+        display: none;
+      }
+
+      .text-content {
+        width: 90%;
+        font-size: 0.9rem;
+      }
+
+      .card-labels p {
+        font-size: 0.9rem;
+      }
+    }
+
   </style>
 </head>
 
@@ -413,11 +503,22 @@
     let paperTitleSearchText = '';
     let currentTab = 'Home Page';    // 当前页面
 
+    // 在groups变量附近添加全局可见的标签定义
+    const alwaysVisibleLabels = ['Functional Shape', 'Task Content', 'Interaction Type'];
+    const allLabels = [
+    'Task Environment', 'Task Content', "Task Entity's Representation",
+    'Manipulation Method', 'Interaction Type', 'Where the Interaction Happens',
+    'Size', 'Quantity', 'Physical Form', 'Functional Shape', 'Material Properties',
+    'Accessible Distance between User and Visualization Widget(s)',
+    'Accessible Distance between User and Task Entity',
+    'Spatial Integration between Task Entity and Visualization Widget(s)'
+    ];
+    
     const groups = [
-      { title: 'Tasks', labels: ['Task Environment', 'Task Content', "Task Entity's Representation"] },
-      { title: 'User Interactions', labels: ['Manipulation Method', 'Interaction Type', 'Where the Interaction Happens'] },
-      { title: 'Visualization Widgets', labels: ['Size', 'Quantity', 'Physical Form', 'Functional Shape', 'Material Properties'] },
-      { title: 'Relative Position', labels: ['Accessible Distance between User and Visualization Widget(s)', 'Accessible Distance between User and Task Entity', 'Spatial Integration between Task Entity and Visualization Widget(s)'] }
+    { title: 'Tasks', labels: ['Task Environment', 'Task Content', "Task Entity's Representation"] },
+    { title: 'User Interactions', labels: ['Manipulation Method', 'Interaction Type', 'Where the Interaction Happens'] },
+    { title: 'Visualization Widgets', labels: ['Size', 'Quantity', 'Physical Form', 'Functional Shape', 'Material Properties'] },
+    { title: 'Relative Position', labels: ['Accessible Distance between User and Visualization Widget(s)', 'Accessible Distance between User and Task Entity', 'Spatial Integration between Task Entity and Visualization Widget(s)'] }
     ];
 
     /* ------- 通用辅助：左键 / 中键统一触发 ------- */
@@ -627,71 +728,304 @@
       const container = document.getElementById('resultsContainer');
       container.innerHTML = '';
       document.getElementById('instanceCount').textContent = `${data.length} / ${allData.length}`;
-    
-      if (!data.length) { container.innerHTML = '<p>No results found.</p>'; return; }
-    
+
+      if (!data.length) {
+        container.innerHTML = '<p>No results found.</p>';
+        return;
+      }
+
       data.forEach((item, idx) => {
-        const card = document.createElement('div'); 
+        const card = document.createElement('div');
         card.className = 'card';
-        // 添加点击展开功能 - 关闭其他所有卡片
-        addUnifiedClick(card, () => {
-        // 移除所有卡片的展开状态
-        document.querySelectorAll('.card').forEach(c => {
-        c.classList.remove('expanded');
+        card.item = item;
+
+        // 点击展开收起逻辑
+        let mouseDownX = 0;
+        let mouseDownY = 0;
+
+        card.addEventListener('mousedown', e => {
+          mouseDownX = e.clientX;
+          mouseDownY = e.clientY;
         });
-        // 切换当前卡片的展开状态
-        card.classList.toggle('expanded');
+
+        addUnifiedClick(card, (e) => {
+          // 如果点击的是标题链接，则不展开/折叠
+          if (e.target.closest('.card-title')) return;
+
+          // 判断是否为拖选行为（鼠标位移大于 3px）
+          const moved = Math.abs(e.clientX - mouseDownX) > 3 || Math.abs(e.clientY - mouseDownY) > 3;
+          if (moved) return;
+
+          // 折叠其它卡片
+          document.querySelectorAll('.card').forEach(c => {
+            if (c !== card) {
+              c.classList.remove('expanded');
+              updateCardLabels(c, c.item);
+            }
+          });
+
+          // toggle 当前卡片展开状态
+          card.classList.toggle('expanded');
+          updateCardLabels(card, card.item);
         });
-    
-        const index = document.createElement('div'); 
-        index.className = 'card-index'; 
+
+        const index = document.createElement('div');
+        index.className = 'card-index';
         index.textContent = idx + 1;
         card.appendChild(index);
-    
+
         const img = document.createElement('img');
         img.src = `Resources/PaperImages/Instance${item.originalIndex + 1}.png`;
         img.alt = 'Figure';
         card.appendChild(img);
-    
-        const content = document.createElement('div'); 
+
+        const content = document.createElement('div');
         content.className = 'card-content';
+
+        const fixedTitle = fixLatexChars(item['Paper Name'] || '');
+        const fixedAuthors = fixLatexChars(item['Authors'] || '');
+
         content.innerHTML = `
           <div class="card-text">
-            <a class="card-title" href="${item['Paper Link'] || '#'}" target="_blank">${item['Paper Name'] || ''}</a>
-            <div class="card-authors">${item['Authors'] || ''}</div>
+            <a class="card-title" href="${item['Paper Link'] || '#'}" target="_blank">${fixedTitle}</a>
+            <div class="card-authors">${fixedAuthors}</div>
           </div>
-          <div class="card-icons"></div>`;
+          <div class="card-labels"></div>`;
+
         card.appendChild(content);
-    
-        // 阻止标题链接的事件冒泡
-        const titleLink = content.querySelector('.card-title');
-        titleLink.addEventListener('click', (e) => {
-          e.stopPropagation();
-        });
-    
-        // 添加14个示例图标
-        const iconsContainer = content.querySelector('.card-icons');
-        for (let i = 1; i <= 14; i++) {
-          const icon = document.createElement('div');
-          icon.className = 'card-icon';
-          icon.textContent = `ex${i}`;
-          iconsContainer.appendChild(icon);
-        }
-    
+
+        const toggleIndicator = document.createElement('div');
+        toggleIndicator.className = 'card-toggle-indicator';
+        toggleIndicator.textContent = '▼'; // 默认未展开
+        card.appendChild(toggleIndicator);
+
+
+        // 阻止点击标题触发展开
+        content.querySelector('.card-title').addEventListener('click', e => e.stopPropagation());
+
+        // 添加初始 label 文本（未展开时）
+        updateCardLabels(card, item);
+
         container.appendChild(card);
       });
     }
 
+    // 更新卡片显示内容
+    function updateCardLabels(card, item) {
+      const isExpanded = card.classList.contains('expanded');
+      const labelContainer = card.querySelector('.card-labels');
+      labelContainer.innerHTML = '';
+
+      if (isExpanded) {
+        const labelColors = {
+          'Task Environment': '#8264AA',
+          'Task Content': '#A2A1CD',
+          "Task Entity's Representation": '#6380A2',
+          'Manipulation Method': '#98B86F',
+          'Interaction Type': '#A6C4B8',
+          'Where the Interaction Happens': '#669295',
+          'Size': '#E1E14F',
+          'Quantity': '#E5BF78',
+          'Functional Shape': '#D08355',
+          'Material Properties': '#B28474',
+          'Accessible Distance between User and Task Entity': '#B86E9F',
+          'Accessible Distance between User and Visualization Widget(s)': '#8D4C60',
+          'Spatial Integration between Task Entity and Visualization Widget(s)': '#C77F80'
+        };
+
+        // 添加自动索引
+        function getAlphaIndex(n) {
+          let result = '';
+          do {
+            result = String.fromCharCode(97 + (n % 26)) + result;
+            n = Math.floor(n / 26) - 1;
+          } while (n >= 0);
+          return result;
+        }
+
+        let labelIndex = 0;
+        // 先渲染除 "Physical Form" 以外的 label
+        allLabels.filter(label => label !== 'Physical Form').forEach(label => {
+          if (item[label]) {
+            const prefix = `(${getAlphaIndex(labelIndex)})`;
+            const p = document.createElement('p');
+            p.innerHTML = `<span style="color: ${labelColors[label] || 'inherit'}; font-weight: bold">${prefix} ${label}:</span> ${item[label]}`;
+            p.style.margin = '4px 0';
+            labelContainer.appendChild(p);
+            labelIndex++;
+          }
+        });
+
+        // 最后渲染 "Physical Form"
+        const physicalForm = 'Physical Form';
+        if (item[physicalForm]) {
+          const prefix = `(${getAlphaIndex(labelIndex)})`;
+          const p = document.createElement('p');
+          p.innerHTML = `<span style="color: ${labelColors[physicalForm] || 'inherit'}; font-weight: bold">${prefix} ${physicalForm}:</span> ${item[physicalForm]}`;
+          p.style.margin = '4px 0';
+          labelContainer.appendChild(p);
+        }
+      } else {
+          // 工具函数
+          function lowerFirst(str) {
+            return str.charAt(0).toLowerCase() + str.slice(1);
+          }
+          function getArticle(word) {
+            const vowels = ['a', 'e', 'i', 'o', 'u'];
+            const firstLetter = word.trim().charAt(0).toLowerCase();
+            return vowels.includes(firstLetter) ? 'an' : 'a';
+          }
+          function toFileName(str) {
+            return str
+              .trim()
+              .toLowerCase()
+              .replace(/\//g, '_')
+              .replace(/[^a-z0-9 _-]/g, '') + '.jpg';
+          }
+
+          // 原始字段
+          const rawA = item['Functional Shape'] || 'shape';
+          const rawB = item['Task Content'] || 'task';
+          const rawC = item['Interaction Type'] || 'interaction';
+
+          // 转为小写用于显示
+          const A = lowerFirst(rawA);
+          const B = lowerFirst(rawB);
+          const C = rawC
+            .split('+')
+            .map(w => lowerFirst(w.trim()))
+            .join('+');
+
+          // 判断 a/an
+          const article = getArticle(A);
+
+          // 颜色
+          const colorA = '#D08355';
+          const colorB = '#A2A1CD';
+          const colorC = '#A6C4B8';
+
+          // 图标路径（使用原始值）
+          const iconStyle = 'width:1em; height:1em; vertical-align:middle; margin-right:4px; object-fit:cover;';
+          const iconA = `<img src="Resources/Icons/${toFileName(rawA)}" style="${iconStyle}">`;
+          const iconB = `<img src="Resources/Icons/${toFileName(rawB)}" style="${iconStyle}">`;
+          const iconC = rawC.split('+').map(w =>
+            `<img src="Resources/Icons/${toFileName(w)}" style="${iconStyle}">`
+          ).join('');
+
+          // 拼接最终句子
+          const summaryHTML = `Use ${article} ${iconA}<span style="color:${colorA}; font-weight:bold">${A}</span> for ` +
+                              `${iconB}<span style="color:${colorB}; font-weight:bold">${B}</span> by ` +
+                              `${iconC}<span style="color:${colorC}; font-weight:bold">${C}</span>.`;
+
+          const summaryP = document.createElement('p');
+          summaryP.innerHTML = summaryHTML;
+          summaryP.style.margin = '4px 0';
+          summaryP.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const clickEvent = new MouseEvent('click', {
+              bubbles: true,
+              cancelable: true,
+              view: window
+            });
+            card.dispatchEvent(clickEvent);
+          });
+          labelContainer.appendChild(summaryP);
+        }
+
+        const indicator = card.querySelector('.card-toggle-indicator');
+        if (indicator) {
+          indicator.textContent = isExpanded ? '▲' : '▼';
+        }
+    }
+
+    function fixLatexChars(str) {
+      return str
+        // 单字母 + accent 组合
+        .replace(/\\'a/g, 'á').replace(/\\'A/g, 'Á')
+        .replace(/\\'e/g, 'é').replace(/\\'E/g, 'É')
+        .replace(/\\'i/g, 'í').replace(/\\'I/g, 'Í')
+        .replace(/\\'o/g, 'ó').replace(/\\'O/g, 'Ó')
+        .replace(/\\'u/g, 'ú').replace(/\\'U/g, 'Ú')
+        .replace(/\\'y/g, 'ý').replace(/\\'Y/g, 'Ý')
+
+        .replace(/\\`a/g, 'à').replace(/\\`A/g, 'À')
+        .replace(/\\`e/g, 'è').replace(/\\`E/g, 'È')
+        .replace(/\\`i/g, 'ì').replace(/\\`I/g, 'Ì')
+        .replace(/\\`o/g, 'ò').replace(/\\`O/g, 'Ò')
+        .replace(/\\`u/g, 'ù').replace(/\\`U/g, 'Ù')
+
+        .replace(/\\\"a/g, 'ä').replace(/\\\"A/g, 'Ä')
+        .replace(/\\\"e/g, 'ë').replace(/\\\"E/g, 'Ë')
+        .replace(/\\\"i/g, 'ï').replace(/\\\"I/g, 'Ï')
+        .replace(/\\\"o/g, 'ö').replace(/\\\"O/g, 'Ö')
+        .replace(/\\\"u/g, 'ü').replace(/\\\"U/g, 'Ü')
+        .replace(/\\\"y/g, 'ÿ').replace(/\\\"Y/g, 'Ÿ')
+
+        .replace(/\\\^a/g, 'â').replace(/\\\^A/g, 'Â')
+        .replace(/\\\^e/g, 'ê').replace(/\\\^E/g, 'Ê')
+        .replace(/\\\^i/g, 'î').replace(/\\\^I/g, 'Î')
+        .replace(/\\\^o/g, 'ô').replace(/\\\^O/g, 'Ô')
+        .replace(/\\\^u/g, 'û').replace(/\\\^U/g, 'Û')
+
+        .replace(/\\~a/g, 'ã').replace(/\\~A/g, 'Ã')
+        .replace(/\\~o/g, 'õ').replace(/\\~O/g, 'Õ')
+        .replace(/\\~n/g, 'ñ').replace(/\\~N/g, 'Ñ')
+
+        .replace(/\\r\{a\}/g, 'å').replace(/\\r\{A\}/g, 'Å')
+
+        .replace(/\\c\{c\}/g, 'ç').replace(/\\c\{C\}/g, 'Ç')
+
+        .replace(/\\v\{c\}/g, 'č').replace(/\\v\{C\}/g, 'Č')
+        .replace(/\\v\{s\}/g, 'š').replace(/\\v\{S\}/g, 'Š')
+        .replace(/\\v\{z\}/g, 'ž').replace(/\\v\{Z\}/g, 'Ž')
+
+        .replace(/\\H\{o\}/g, 'ő').replace(/\\H\{O\}/g, 'Ő')
+        .replace(/\\H\{u\}/g, 'ű').replace(/\\H\{U\}/g, 'Ű')
+
+        .replace(/\\u\{o\}/g, 'ŏ').replace(/\\u\{O\}/g, 'Ŏ')
+        .replace(/\\u\{e\}/g, 'ĕ').replace(/\\u\{E\}/g, 'Ĕ')
+
+        .replace(/\\\.{I}/g, 'İ').replace(/\\\.{i}/g, 'ı') // dotless i and dotted I
+
+        // 特殊符号和连字
+        .replace(/\\ae/g, 'æ').replace(/\\AE/g, 'Æ')
+        .replace(/\\oe/g, 'œ').replace(/\\OE/g, 'Œ')
+        .replace(/\\ss/g, 'ß')
+
+        .replace(/\\o/g, 'ø').replace(/\\O\{\}/g, 'Ø').replace(/\\O/g, 'Ø')
+        .replace(/\\l/g, 'ł').replace(/\\L/g, 'Ł')
+
+        // fallback: 删除未识别的 LaTeX 控制符
+        .replace(/\\[a-zA-Z]+\{?[a-zA-Z]?\}?/g, '')
+        .replace(/\\'/g, '').replace(/\\`/g, '')
+        .replace(/\\\^/g, '').replace(/\\\"/g, '')
+        .replace(/\\~/g, '').replace(/\\c/g, '')
+        .replace(/\\v/g, '').replace(/\\H/g, '')
+        .replace(/\\r/g, '').replace(/\\u/g, '')
+        .replace(/\\\./g, '').replace(/\\=/g, '');
+    }
+
+    function fixLatexInData(data) {
+      data.forEach((d, i) => {
+        d.originalIndex = i;
+        Object.keys(d).forEach(key => {
+          if (typeof d[key] === 'string') {
+            d[key] = fixLatexChars(d[key]);
+          }
+        });
+      });
+    }
+
     async function loadCSVData() {
-      const resp  = await fetch('Resources/metadata.csv');
-      // 使用arrayBuffer替代text()以显式控制编码
+      const resp = await fetch('Resources/metadata.csv');
       const buffer = await resp.arrayBuffer();
       const decoder = new TextDecoder('utf-8');
       let text = decoder.decode(buffer);
-      // 移除可能存在的UTF-8 BOM头
-      text = text.replace(/^\ufeff/, '');
-      const data  = d3.csvParse(text);
-      data.forEach((d, i) => d.originalIndex = i);
+      text = text.replace(/^\ufeff/, ''); // 移除 UTF-8 BOM
+      const data = d3.csvParse(text);
+
+      fixLatexInData(data); // ✅ 加入修复逻辑
+
       allData = data;
       createFilterOptions();
       renderResults(allData);
@@ -726,11 +1060,12 @@
         applyFilters();
       };
 
-      // 点击空白处关闭所有展开的卡片
+      // 修改点击空白处关闭卡片的逻辑
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.card')) {
           document.querySelectorAll('.card.expanded').forEach(card => {
             card.classList.remove('expanded');
+            updateCardLabels(card, card.item);  // 正确地重置为 summary 格式
           });
         }
       });
