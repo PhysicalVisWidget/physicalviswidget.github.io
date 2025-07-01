@@ -326,14 +326,7 @@
       word-break: break-all;    
     }
 
-    @media screen and (max-width: 800px) {
-      .layout-outer { flex-direction: column; align-items: center; }
-      .left-gap, .middle-gap, .right-gap { display: none; }
-      .results-table-container, .filter-bar { width: 90% !important; }
-      .text-content { width: 90%; }
-    }
-
-    @media screen and (max-width: 600px) {
+    @media screen and (max-width: 900px) {
       .header h1 {
         font-size: 1.2rem;
       }
@@ -418,6 +411,35 @@
 
       .card-labels p {
         font-size: 0.9rem;
+      }
+
+      #citationCard {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 90% !important;
+        max-width: 300px !important;
+        padding: 15px !important;
+        z-index: 99999 !important;
+        max-height: 70vh !important; 
+        overflow-y: auto !important; 
+        -webkit-overflow-scrolling: touch !important; 
+      }
+
+      #citationCard p {
+        font-size: 0.9rem;
+        line-height: 1.4;
+        margin: 0 0 10px 0;
+      }
+
+      #citationCard::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      #citationCard::-webkit-scrollbar-thumb {
+        background-color: var(--txt-secondary);
+        border-radius: 3px;
       }
     }
 
