@@ -8,7 +8,6 @@
   <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
 
   <style>
-    /* ===============  Warm Neumorphism Tokens (tuned)  =============== */
     :root {
       --bg:            #f2f0eb;
       --elevated:      #ffffff;
@@ -22,7 +21,6 @@
       --transition-fast: 0.25s ease;
     }
 
-    /* ===============  Base / Reset  =============== */
     * { box-sizing: border-box; }
     body {
       font-family: 'JetBrains Mono', monospace;
@@ -35,7 +33,6 @@
 
     a { color: var(--accent); text-decoration: underline; }
 
-    /* ===============  Neumorphism helpers  =============== */
     .neu-flat {
       background: var(--elevated);
       border-radius: var(--radius-md);
@@ -51,7 +48,6 @@
                   inset -4px -4px 6px var(--shadow-light);
     }
 
-    /* raised style for un-selected selects */
     .neu-select-default {
       background: var(--elevated);
       border-radius: var(--radius-md);
@@ -59,7 +55,6 @@
                   -4px -4px 10px var(--shadow-light);
     }
 
-    /* 交互 lift（静态元素用 .static 覆盖） */
     .neu-flat:hover { transform: translateY(-2px); }
     .neu-flat:active {
       box-shadow: inset 3px 3px 6px var(--shadow-dark),
@@ -67,7 +62,6 @@
       transform: translateY(2px);
     }
 
-    /* 被按下(选中)的恒定样式 */
     .pressed {
       box-shadow: inset 3px 3px 6px var(--shadow-dark),
                   inset -3px -3px 6px var(--shadow-light) !important;
@@ -75,7 +69,6 @@
     }
     .pressed:hover { transform: translateY(2px) !important; }
 
-    /* 静态 surface（无 hover/active）*/
     .static { cursor: default; }
     .static.neu-flat:hover,
     .static.neu-flat:active {
@@ -84,7 +77,6 @@
                   -9px -9px 16px var(--shadow-light);
     }
 
-    /* ===============  Header & Navbar  =============== */
     .header-container {
       position: fixed;
       top: 0; left: 0; width: 100%;
@@ -97,7 +89,6 @@
     .header h1 { font-size: 1.8rem; font-weight: 700; margin: 0; }
     .authors { font-style: italic; color: var(--txt-secondary); margin: 4px 0 0; }
 
-    /* Navbar */
     .navbar {
       display: flex; justify-content: center; flex-wrap: wrap;
       gap: 12px; margin-top: 14px;
@@ -114,20 +105,17 @@
     }
     .icon-placeholder { width: 18px; text-align: center; }
 
-    /* Teaser (静态) */
     .teaser {
       background: var(--elevated);
       border-radius: var(--radius-lg);
       box-shadow: 9px 9px 16px var(--shadow-dark),
                   -9px -9px 16px var(--shadow-light);
       padding: 16px;
-      width: 65%;            /* --- requirement #3 --- */
+      width: 65%;           
       max-width: 65%;
       height: auto; margin: 0 auto 20px; display: block;
     }
 
-    /* Layout */
-    /* top offset handled via JS so no hard-coded padding */
     .content-wrapper {
       width: 100%;
     }
@@ -137,7 +125,6 @@
     }
     .left-gap, .middle-gap, .right-gap { flex: 1 1 5%; max-width: 5%; }
 
-    /* Result cards */
     .results-table-container { flex: 1 1 65%; display: flex; flex-direction: column; gap: 20px; }
     .card {
       background: var(--elevated);
@@ -176,7 +163,7 @@
     .card-text {
       overflow: hidden;
       display: -webkit-box;
-      -webkit-line-clamp: 4; /* 控制标题和作者显示行数 */
+      -webkit-line-clamp: 4; 
       -webkit-box-orient: vertical;
       text-overflow: ellipsis;
     }
@@ -189,22 +176,19 @@
     .card-title   { font-weight: 700; font-size: 1rem; margin-bottom: 6px; text-decoration: underline; color: var(--txt-primary); }
     .card-authors { font-size: 0.85rem; color: var(--txt-secondary); margin-bottom: 6px; }
 
-    /* Exploration mode image styles */
-    /* Exploration mode image styles */
     .results-table-container.exploration-active .card img {
       border-radius: 0;
       box-shadow: none;
       background: transparent;
     }
 
-    /* 添加探索模式下卡片固定高度和文本溢出处理 */
     .results-table-container.exploration-active .card {
-      height: 150px; /* 固定卡片高度 */
+      height: 150px; 
       transition: height 0.3s ease;
     }
 
     .results-table-container.exploration-active .card.expanded {
-      height: auto; /* 自适应高度以显示完整内容 */
+      height: auto; 
     }
 
     .results-table-container.exploration-active .card.expanded .card-content {
@@ -213,7 +197,6 @@
       -webkit-line-clamp: none;
     }
 
-    /* 展开状态下的图标布局 - 一行3个 */
     .results-table-container.exploration-active .card.expanded .card-icons {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -229,12 +212,11 @@
     .card-content {
       overflow: hidden;
       display: -webkit-box;
-      -webkit-line-clamp: 4; /* 显示多少行后截断 */
+      -webkit-line-clamp: 4; 
       -webkit-box-orient: vertical;
       text-overflow: ellipsis;
     }
 
-    /* Filter sidebar */
     .filter-bar {
       flex: 1 1 20%; background: var(--elevated);
       border-radius: var(--radius-lg);
@@ -244,17 +226,13 @@
       height: fit-content; min-width: 200px;
     }
 
-    /* 添加筛选栏悬浮样式 */
     .filter-bar.sticky {
       position: sticky;
       overflow-y: auto;
-      /* 位置和高度将通过JS动态设置 */
-      /* 添加滚动条样式优化 */
       scrollbar-width: thin;
       scrollbar-color: var(--txt-secondary) transparent;
     }
 
-    /* 自定义滚动条样式 */
     .filter-bar.sticky::-webkit-scrollbar {
       width: 6px;
     }
@@ -303,7 +281,6 @@
       transform: translateY(2px);
     }
 
-    /* Home-page text */
     .text-content {
       width: 80%; margin: 0 auto;
       font-size: 0.95rem; line-height: 1.6; text-align: justify;
@@ -313,7 +290,37 @@
                   -9px -9px 16px var(--shadow-light);
     }
 
-    /* Responsive */
+    .contact-card {
+      width: auto;              
+      max-width: 800px;         
+      text-align: left;         
+      margin: 20px auto;        
+      padding: 20px 20px;     
+      display: inline-block;   
+    }
+
+    .contact-card .contact-row {
+      display: flex;            
+      align-items: center;    
+      margin-bottom: 12px;     
+    }
+
+    .contact-card .contact-name {
+      width: 120px;              
+      font-weight: bold;      
+      margin-left: 6px;          
+    }
+
+    .contact-card .orcid-link {
+      margin: 0 10px;           
+    }
+
+    .contact-card .contact-email {
+      flex-grow: 1;             
+      margin-right: 10px;      
+      word-break: break-all;    
+    }
+
     @media screen and (max-width: 800px) {
       .layout-outer { flex-direction: column; align-items: center; }
       .left-gap, .middle-gap, .right-gap { display: none; }
@@ -321,7 +328,6 @@
       .text-content { width: 90%; }
     }
 
-    /* =============== Responsive for Mobile =============== */
     @media screen and (max-width: 600px) {
       .header h1 {
         font-size: 1.2rem;
@@ -410,33 +416,45 @@
       }
     }
 
+    .authors a {
+      color: var(--txt-secondary);
+      text-decoration: underline;
+    }
+
+    .icon-link {
+      text-decoration: none;
+    }
+
   </style>
 </head>
 
 <body>
-  <!-- =============== HEADER =============== -->
   <div class="header-container">
     <div class="header">
       <h1>Designing Visualization Widgets for Tangible Data Exploration:</h1>
       <h1>A Systematic Review</h1>
-      <p class="authors">Haonan Yao, Lingyun Yu, Lijie Yao</p>
+      <p class="authors">
+        <a href="https://orcid.org/0009-0003-8069-0338" target="_blank">Haonan Yao<span style="margin-left:6px;"></span><img src="Resources/Icons/orcid.svg" alt="ORCID" style="height:1em; vertical-align:middle;"></a>, 
+        <a href="https://orcid.org/0000-0003-0546-5926" target="_blank">Lingyun Yu<span style="margin-left:6px;"></span><img src="Resources/Icons/orcid.svg" alt="ORCID" style="height:1em; vertical-align:middle;"></a>, 
+        <a href="https://orcid.org/0000-0002-4208-5140" target="_blank">Lijie Yao<span style="margin-left:6px;"></span><img src="Resources/Icons/orcid.svg" alt="ORCID" style="height:1em; vertical-align:middle;"></a>
+      </p>
+      <p class="authors" style="margin-top: 2px; font-style: normal;">
+        Department of Computing, School of Advanced Technology, Xi'an Jiaotong-Liverpool University
+      </p>
     </div>
 
     <img src="Resources/Teaser.jpg" class="teaser neu-flat static" alt="Teaser">
 
     <div class="navbar">
-      <!-- data-tab 用于本地切换；data-link 外链按钮 -->
       <button class="neu-flat" data-tab="home"><span class="icon-placeholder">🏠</span>Home Page</button>
       <button class="neu-flat" data-tab="explore"><span class="icon-placeholder">🔭</span>Exploration</button>
       <button class="neu-flat" data-link="https://example.com/paper"  ><span class="icon-placeholder">📄</span>Paper</button>
       <button class="neu-flat" data-link="https://osf.io/vjw5e/"       ><span class="icon-placeholder">📁</span>OSF</button>
-      <button class="neu-flat" data-link="mailto:haonanyao0622@gmail.com"><span class="icon-placeholder">📧</span>Contact</button>
+      <button class="neu-flat" data-tab="contact"><span class="icon-placeholder">📧</span>Contact</button>
     </div>
   </div>
 
-  <!-- =============== MAIN CONTENT =============== -->
   <div class="content-wrapper">
-    <!-- Exploration -->
     <div class="layout-outer" id="exploreSection">
       <div class="left-gap"></div>
 
@@ -469,7 +487,6 @@
       <div class="right-gap"></div>
     </div>
 
-    <!-- Home Page -->
     <div id="textSection" style="display:none">
       <div class="text-content">
         <h3 class="card-title" style="font-size: 1rem; font-weight: bold; color: var(--txt-primary); margin-top: 0; text-decoration: none; font-family: Arial">Abstract</h3>
@@ -493,17 +510,46 @@
         </p>
       </div>
     </div>
+
+    <div id="contactSection" style="display:none; margin: 0 auto; text-align: center;" class="text-content contact-card">
+      <h3 class="card-title" style="font-size: 1rem; font-weight: bold; color: var(--txt-primary); margin-top: 0; text-decoration: none; font-family: Arial; text-align: left;">Contact</h3>
+
+      <div class="contact-row">
+        <span class="contact-name">Haonan Yao</span>
+        <a class="icon-link orcid-link" href="https://orcid.org/0009-0003-8069-0338" target="_blank">
+          <img src="Resources/Icons/orcid.svg" alt="ORCID" style="height:1em; vertical-align:middle;">
+        </a>
+        <span class="contact-email">haonanyao0622@gmail.com</span>
+        <a class="icon-link email-link" href="#" onclick="sendMail('haonanyao0622@gmail.com')">📧</a>
+      </div>
+
+      <div class="contact-row">
+        <span class="contact-name">Lingyun Yu</span>
+        <a class="icon-link orcid-link" href="https://orcid.org/0000-0003-0546-5926" target="_blank">
+          <img src="Resources/Icons/orcid.svg" alt="ORCID" style="height:1em; vertical-align:middle;">
+        </a>
+        <span class="contact-email">lingyun.yu@xjtlu.edu.cn</span>
+        <a class="icon-link email-link" href="#" onclick="sendMail('lingyun.yu@xjtlu.edu.cn')">📧</a>
+      </div>
+
+      <div class="contact-row">
+        <span class="contact-name">Lijie Yao</span>
+        <a class="icon-link orcid-link" href="https://orcid.org/0000-0002-4208-5140" target="_blank">
+          <img src="Resources/Icons/orcid.svg" alt="ORCID" style="height:1em; vertical-align:middle;">
+        </a>
+        <span class="contact-email">lijie.yao@xjtlu.edu.cn</span>
+        <a class="icon-link email-link" href="#" onclick="sendMail('lijie.yao@xjtlu.edu.cn')">📧</a>
+      </div>
+    </div>
+
   </div>
 
-  <!-- =============== SCRIPTS =============== -->
   <script>
-    /* ---------- Dataset & Filters ---------- */
     let allData = [];
     let currentFilters = {};
     let paperTitleSearchText = '';
-    let currentTab = 'Home Page';    // 当前页面
+    let currentTab = 'Home Page';    
 
-    // 在groups变量附近添加全局可见的标签定义
     const alwaysVisibleLabels = ['Functional Shape', 'Task Content', 'Interaction Type'];
     const allLabels = [
     'Task Environment', 'Task Content', "Task Entity's Representation",
@@ -521,44 +567,39 @@
     { title: 'Relative Position', labels: ['Accessible Distance between User and Visualization Widget(s)', 'Accessible Distance between User and Task Entity', 'Spatial Integration between Task Entity and Visualization Widget(s)'] }
     ];
 
-    /* ------- 通用辅助：左键 / 中键统一触发 ------- */
     function addUnifiedClick(el, handler) {
-      // 左键 click
-      el.addEventListener('click',  e => handler(e, /*isMiddle=*/false));
+      el.addEventListener('click',  e => handler(e, false));
 
-      // 中键 (部分浏览器只触发 auxclick，部分只触发 mousedown)  
       el.addEventListener('auxclick', e => {
         if (e.button === 1) {
           e.preventDefault();
-          handler(e, /*isMiddle=*/true);
+          handler(e, true);
         }
       });
       el.addEventListener('mousedown', e => {
         if (e.button === 1) {
           e.preventDefault();
-          handler(e, /*isMiddle=*/true);
+          handler(e, true);
         }
       });
     }
 
-    /* ------- 导航按钮“被按下”样式同步 ------- */
     const navButtons = document.querySelectorAll('.navbar button');
 
     function updateNavPressed() {
       navButtons.forEach(btn => {
         const tab = btn.dataset.tab;
         if ((tab === 'home' && currentTab === 'Home Page') ||
-            (tab === 'explore' && currentTab === 'Exploration')) {
-          btn.classList.add('pressed');
-        } else {
-          btn.classList.remove('pressed');
-        }
+          (tab === 'explore' && currentTab === 'Exploration') ||
+          (tab === 'contact' && currentTab === 'Contact')) {
+        btn.classList.add('pressed');
+      } else {
+        btn.classList.remove('pressed');
+      }
       });
     }
 
-    /* 初始化按钮交互监听 */
     navButtons.forEach(btn => {
-      // hover 按压动画
       btn.addEventListener('mousedown', () => {
         navButtons.forEach(b => b.classList.remove('pressed'));
         btn.classList.add('pressed');
@@ -566,50 +607,54 @@
       btn.addEventListener('mouseup',   updateNavPressed);
       btn.addEventListener('mouseleave',updateNavPressed);
 
-      // 左键 + 中键统一导航
       addUnifiedClick(btn, (e) => {
-        if (btn.dataset.tab) {
-          currentTab = (btn.dataset.tab === 'home') ? 'Home Page' : 'Exploration';
-          switchTab(currentTab);
-          updateNavPressed();
-        } else if (btn.dataset.link) {
-          // 外链：始终在新标签页打开
+      if (btn.dataset.tab) {
+        if (btn.dataset.tab === 'home') {
+          currentTab = 'Home Page';
+        } else if (btn.dataset.tab === 'explore') {
+          currentTab = 'Exploration';
+        } else if (btn.dataset.tab === 'contact') {
+          currentTab = 'Contact';
+        }
+        switchTab(currentTab);
+        updateNavPressed();
+      } else if (btn.dataset.link) {
           window.open(btn.dataset.link, '_blank');
         }
       });
     });
 
-    /* middle/left-click support for Reset button */
     addUnifiedClick(document.getElementById('resetFilters'), () => resetAllFilters());
 
-    /* ------- 页面切换 ------- */
     function switchTab(tabName) {
-        const explore = document.getElementById('exploreSection');
-        const text    = document.getElementById('textSection');
-        const filterBar = document.querySelector('.filter-bar');
-        const resultsContainer = document.querySelector('.results-table-container');
-        
-        if (tabName === 'Home Page') {
-            explore.style.display = 'none';
-            text.style.display    = 'block';
-            filterBar.classList.remove('sticky');
-            resultsContainer.classList.remove('exploration-active');
-        } else {
-            explore.style.display = 'flex';
-            text.style.display    = 'none';
-            // 切换到探索页面时更新所有筛选选项框样式
-            document.querySelectorAll('.filter-select').forEach(select => {
-                toggleSelectStyle(select);
-            });
-            filterBar.classList.add('sticky');
-            updateFilterBarPosition(); // 更新筛选栏位置
-            resultsContainer.classList.add('exploration-active');
-        }
-        updateContentOffset(); // 添加此行以重新计算内容偏移量
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      const explore = document.getElementById('exploreSection');
+      const text    = document.getElementById('textSection');
+      const contact = document.getElementById('contactSection');
+      const filterBar = document.querySelector('.filter-bar');
+      const resultsContainer = document.querySelector('.results-table-container');
+
+      explore.style.display = 'none';
+      text.style.display    = 'none';
+      contact.style.display = 'none';
+      filterBar.classList.remove('sticky');
+      resultsContainer.classList.remove('exploration-active');
+
+      if (tabName === 'Home Page') {
+        text.style.display = 'block';
+      } else if (tabName === 'Exploration') {
+        explore.style.display = 'flex';
+        document.querySelectorAll('.filter-select').forEach(select => toggleSelectStyle(select));
+        filterBar.classList.add('sticky');
+        updateFilterBarPosition();
+        resultsContainer.classList.add('exploration-active');
+      } else if (tabName === 'Contact') {
+        contact.style.display = 'block';
+      }
+
+      updateContentOffset();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    /* ------- Filter UI 构建 & 数据渲染 ------- */
     function createFilterOptions() {
       const container = document.getElementById('filterOptions');
       container.innerHTML = '';
@@ -618,7 +663,6 @@
         sec.className = 'filter-section';
     
         const title = document.createElement('h4');
-        // 添加图标和颜色
         const icon = document.createElement('img');
         switch(group.title) {
           case 'Tasks':
@@ -647,13 +691,11 @@
         sec.appendChild(title);
 
         group.labels.forEach(label => {
-          // 统计筛选后的数量
           const allValues   = [...new Set(allData.map(d => d[label]))].filter(Boolean).sort();
           const filtered    = applyCurrentFilterExcept(label);
           const counts      = Object.fromEntries(allValues.map(v => [v, 0]));
           filtered.forEach(d => { const v = d[label]; if (v) counts[v]++; });
 
-          // UI 容器
           const item = document.createElement('div');
           item.className = 'filter-item';
 
@@ -669,11 +711,10 @@
             select.innerHTML += `<option value="${v}">${v} (${counts[v] || 0})</option>`;
           });
 
-          // 当前状态
           select.value = currentFilters[label] || '';
           toggleSelectStyle(select);
 
-          addUnifiedClick(select, () =>{/*no-op: select handles change*/});
+          addUnifiedClick(select, () =>{});
           select.onchange = e => {
             currentFilters[label] = e.target.value;
             toggleSelectStyle(e.target);
@@ -687,19 +728,14 @@
       });
     }
 
-    // 处于默认“All”时使用 raised 样式
     function toggleSelectStyle(sel) {
       if (sel.value === '') {
-        // 移除按下样式，添加弹起样式
         sel.classList.remove('neu-inset');
         sel.classList.add('neu-select-default');
-        // 强制应用弹起状态的阴影样式
         sel.style.boxShadow = '6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light)';
       } else {
-        // 移除弹起样式，添加按下样式
         sel.classList.add('neu-inset');
         sel.classList.remove('neu-select-default');
-        // 恢复按下状态的阴影样式
         sel.style.boxShadow = 'inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light)';
       }
     }
@@ -739,7 +775,6 @@
         card.className = 'card';
         card.item = item;
 
-        // 点击展开收起逻辑
         let mouseDownX = 0;
         let mouseDownY = 0;
 
@@ -749,14 +784,11 @@
         });
 
         addUnifiedClick(card, (e) => {
-          // 如果点击的是标题链接，则不展开/折叠
           if (e.target.closest('.card-title')) return;
 
-          // 判断是否为拖选行为（鼠标位移大于 3px）
           const moved = Math.abs(e.clientX - mouseDownX) > 3 || Math.abs(e.clientY - mouseDownY) > 3;
           if (moved) return;
 
-          // 折叠其它卡片
           document.querySelectorAll('.card').forEach(c => {
             if (c !== card) {
               c.classList.remove('expanded');
@@ -764,7 +796,6 @@
             }
           });
 
-          // toggle 当前卡片展开状态
           card.classList.toggle('expanded');
           updateCardLabels(card, card.item);
         });
@@ -796,27 +827,68 @@
 
         const toggleIndicator = document.createElement('div');
         toggleIndicator.className = 'card-toggle-indicator';
-        toggleIndicator.textContent = '▼'; // 默认未展开
+        toggleIndicator.textContent = '▼'; 
         card.appendChild(toggleIndicator);
 
-
-        // 阻止点击标题触发展开
         content.querySelector('.card-title').addEventListener('click', e => e.stopPropagation());
 
-        // 添加初始 label 文本（未展开时）
         updateCardLabels(card, item);
 
         container.appendChild(card);
       });
     }
 
-    // 更新卡片显示内容
     function updateCardLabels(card, item) {
       const isExpanded = card.classList.contains('expanded');
       const labelContainer = card.querySelector('.card-labels');
       labelContainer.innerHTML = '';
 
       if (isExpanded) {
+        function lowerFirst(str) {
+          return str.charAt(0).toLowerCase() + str.slice(1);
+        }
+        function getArticle(word) {
+          const vowels = ['a', 'e', 'i', 'o', 'u'];
+          const firstLetter = word.trim().charAt(0).toLowerCase();
+          return vowels.includes(firstLetter) ? 'an' : 'a';
+        }
+        function toFileName(str) {
+          return str.trim().toLowerCase().replace(/\//g, '_').replace(/[^a-z0-9 _-]/g, '') + '.jpg';
+        }
+        const rawA = item['Functional Shape'] || 'shape';
+        const rawB = item['Task Content'] || 'task';
+        const rawC = item['Interaction Type'] || 'interaction';
+        const A = lowerFirst(rawA);
+        const B = lowerFirst(rawB);
+        const C = rawC.split('+').map(w => lowerFirst(w.trim())).join('+');
+        const article = getArticle(A);
+        const colorA = '#D08355';
+        const colorB = '#A2A1CD';
+        const colorC = '#A6C4B8';
+        const iconStyle = 'width:1em; height:1em; vertical-align:middle; margin-right:4px; object-fit:cover;';
+        const iconA = `<img src="Resources/Icons/${toFileName(rawA)}" style="${iconStyle}">`;
+        const iconB = `<img src="Resources/Icons/${toFileName(rawB)}" style="${iconStyle}">`;
+        const iconC = rawC.split('+').map(w =>
+          `<img src="Resources/Icons/${toFileName(w)}" style="${iconStyle}">`
+        ).join('');
+        const summaryHTML = `Use ${article} ${iconA}<span style="color:${colorA}; font-weight:bold">${A}</span> for ` +
+                            `${iconB}<span style="color:${colorB}; font-weight:bold">${B}</span> by ` +
+                            `${iconC}<span style="color:${colorC}; font-weight:bold">${C}</span>.`;
+
+        const summaryP = document.createElement('p');
+        summaryP.innerHTML = summaryHTML;
+        summaryP.style.margin = '4px 0';
+        summaryP.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const clickEvent = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            view: window
+          });
+          card.dispatchEvent(clickEvent);
+        });
+        labelContainer.appendChild(summaryP);
+
         const labelColors = {
           'Task Environment': '#8264AA',
           'Task Content': '#A2A1CD',
@@ -833,7 +905,6 @@
           'Spatial Integration between Task Entity and Visualization Widget(s)': '#C77F80'
         };
 
-        // 添加自动索引
         function getAlphaIndex(n) {
           let result = '';
           do {
@@ -844,7 +915,6 @@
         }
 
         let labelIndex = 0;
-        // 先渲染除 "Physical Form" 以外的 label
         allLabels.filter(label => label !== 'Physical Form').forEach(label => {
           if (item[label]) {
             const prefix = `(${getAlphaIndex(labelIndex)})`;
@@ -856,7 +926,6 @@
           }
         });
 
-        // 最后渲染 "Physical Form"
         const physicalForm = 'Physical Form';
         if (item[physicalForm]) {
           const prefix = `(${getAlphaIndex(labelIndex)})`;
@@ -866,7 +935,6 @@
           labelContainer.appendChild(p);
         }
       } else {
-          // 工具函数
           function lowerFirst(str) {
             return str.charAt(0).toLowerCase() + str.slice(1);
           }
@@ -883,12 +951,10 @@
               .replace(/[^a-z0-9 _-]/g, '') + '.jpg';
           }
 
-          // 原始字段
           const rawA = item['Functional Shape'] || 'shape';
           const rawB = item['Task Content'] || 'task';
           const rawC = item['Interaction Type'] || 'interaction';
 
-          // 转为小写用于显示
           const A = lowerFirst(rawA);
           const B = lowerFirst(rawB);
           const C = rawC
@@ -896,15 +962,12 @@
             .map(w => lowerFirst(w.trim()))
             .join('+');
 
-          // 判断 a/an
           const article = getArticle(A);
 
-          // 颜色
           const colorA = '#D08355';
           const colorB = '#A2A1CD';
           const colorC = '#A6C4B8';
 
-          // 图标路径（使用原始值）
           const iconStyle = 'width:1em; height:1em; vertical-align:middle; margin-right:4px; object-fit:cover;';
           const iconA = `<img src="Resources/Icons/${toFileName(rawA)}" style="${iconStyle}">`;
           const iconB = `<img src="Resources/Icons/${toFileName(rawB)}" style="${iconStyle}">`;
@@ -912,7 +975,6 @@
             `<img src="Resources/Icons/${toFileName(w)}" style="${iconStyle}">`
           ).join('');
 
-          // 拼接最终句子
           const summaryHTML = `Use ${article} ${iconA}<span style="color:${colorA}; font-weight:bold">${A}</span> for ` +
                               `${iconB}<span style="color:${colorB}; font-weight:bold">${B}</span> by ` +
                               `${iconC}<span style="color:${colorC}; font-weight:bold">${C}</span>.`;
@@ -940,7 +1002,6 @@
 
     function fixLatexChars(str) {
       return str
-        // 单字母 + accent 组合
         .replace(/\\'a/g, 'á').replace(/\\'A/g, 'Á')
         .replace(/\\'e/g, 'é').replace(/\\'E/g, 'É')
         .replace(/\\'i/g, 'í').replace(/\\'I/g, 'Í')
@@ -985,9 +1046,8 @@
         .replace(/\\u\{o\}/g, 'ŏ').replace(/\\u\{O\}/g, 'Ŏ')
         .replace(/\\u\{e\}/g, 'ĕ').replace(/\\u\{E\}/g, 'Ĕ')
 
-        .replace(/\\\.{I}/g, 'İ').replace(/\\\.{i}/g, 'ı') // dotless i and dotted I
+        .replace(/\\\.{I}/g, 'İ').replace(/\\\.{i}/g, 'ı') 
 
-        // 特殊符号和连字
         .replace(/\\ae/g, 'æ').replace(/\\AE/g, 'Æ')
         .replace(/\\oe/g, 'œ').replace(/\\OE/g, 'Œ')
         .replace(/\\ss/g, 'ß')
@@ -995,7 +1055,6 @@
         .replace(/\\o/g, 'ø').replace(/\\O\{\}/g, 'Ø').replace(/\\O/g, 'Ø')
         .replace(/\\l/g, 'ł').replace(/\\L/g, 'Ł')
 
-        // fallback: 删除未识别的 LaTeX 控制符
         .replace(/\\[a-zA-Z]+\{?[a-zA-Z]?\}?/g, '')
         .replace(/\\'/g, '').replace(/\\`/g, '')
         .replace(/\\\^/g, '').replace(/\\\"/g, '')
@@ -1021,17 +1080,16 @@
       const buffer = await resp.arrayBuffer();
       const decoder = new TextDecoder('utf-8');
       let text = decoder.decode(buffer);
-      text = text.replace(/^\ufeff/, ''); // 移除 UTF-8 BOM
+      text = text.replace(/^\ufeff/, ''); 
       const data = d3.csvParse(text);
 
-      fixLatexInData(data); // ✅ 加入修复逻辑
+      fixLatexInData(data); 
 
       allData = data;
       createFilterOptions();
       renderResults(allData);
     }
 
-    /* ------- 重置 ------- */
     function resetAllFilters() {
       currentFilters = {};
       paperTitleSearchText = '';
@@ -1040,46 +1098,39 @@
       createFilterOptions();
     }
 
-    /* ------- 动态计算内容顶距 (满足需求 #4) ------- */
     function updateContentOffset() {
       const header = document.querySelector('.header-container');
       const contentWrapper = document.querySelector('.content-wrapper');
       if (header && contentWrapper) {
-        const offset = header.offsetHeight + 20; // 20px 余量
+        const offset = header.offsetHeight + 20; 
         contentWrapper.style.marginTop = offset + 'px';
       }
     }
 
-    /* ------- 初始化 ------- */
     document.addEventListener('DOMContentLoaded', () => {
       loadCSVData();
 
-      // 搜索输入
       document.getElementById('paperTitleSearch').oninput = e => {
         paperTitleSearchText = e.target.value;
         applyFilters();
       };
 
-      // 修改点击空白处关闭卡片的逻辑
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.card')) {
           document.querySelectorAll('.card.expanded').forEach(card => {
             card.classList.remove('expanded');
-            updateCardLabels(card, card.item);  // 正确地重置为 summary 格式
+            updateCardLabels(card, card.item);  
           });
         }
       });
 
-      // 默认 Home Page
       switchTab('Home Page');
       updateNavPressed();
     });
 
-    // 在所有资源加载完 & 窗口尺寸变化时更新顶距
     window.addEventListener('load', updateContentOffset);
     window.addEventListener('resize', updateContentOffset);
 
-    // 添加筛选栏位置更新函数
     function updateFilterBarPosition() {
       const headerHeight = document.querySelector('.header-container').offsetHeight;
       const filterBar = document.querySelector('.filter-bar.sticky');
@@ -1089,14 +1140,11 @@
       }
     }
 
-    // 页面加载和窗口调整时更新筛选栏位置
     window.addEventListener('load', updateFilterBarPosition);
     window.addEventListener('resize', updateFilterBarPosition);
 
-    // 添加筛选栏独立滚动功能
     const filterBar = document.querySelector('.filter-bar');
     
-    // 跟踪鼠标是否悬停在筛选栏上
     let isHoveringFilterBar = false;
     
     filterBar.addEventListener('mouseenter', () => {
@@ -1108,15 +1156,25 @@
     });
     
     filterBar.addEventListener('wheel', function(e) {
-      // 只有当鼠标悬停且内容超出容器高度时才处理滚动
       if (isHoveringFilterBar && this.scrollHeight > this.clientHeight) {
-        // 允许筛选栏滚动
         this.scrollTop += e.deltaY;
-        // 阻止事件冒泡到页面
         e.preventDefault();
         e.stopPropagation();
       }
     }, { passive: false });
+
+    function sendMail(to) {
+      const allEmails = [
+        'haonanyao0622@gmail.com',
+        'lingyun.yu@xjtlu.edu.cn',
+        'lijie.yao@xjtlu.edu.cn'
+      ];
+      const cc = allEmails.filter(email => email !== to).join(',');
+      const subject = encodeURIComponent('[PhysicalVisWidget] Inquiry email');
+      const mailto = `mailto:${to}?subject=${subject}&cc=${cc}`;
+      window.location.href = mailto;
+    }
+
   </script>
 </body>
 </html>
