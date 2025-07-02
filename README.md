@@ -55,7 +55,7 @@ Next, you can now test the website locally or explore it online.
 
 Now, you should be able to access and use our interactive website to select conditions from categorization or enter paper information to filter results from our systematic review. Here is an example image of our interactive website interfaces:
 
-<img title="PC interfaces example image of our interactive website" alt="An example image of our interactive website interface on PCs" src="interface_PC.jpg">
+<img title="PC interfaces example image of our interactive website" alt="An example image of our interactive website interface on PCs" src="interface.jpg">
 
 ## Updating in progress
 This repository will be updated upon the official publication of the paper in the IEEE VIS 2025 proceedings. Stay tuned for the final version.
