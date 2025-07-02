@@ -33,8 +33,7 @@ To begin, either clone this repository or if you stay within GitHub, use the ''u
     ├── Resources
     ├── README.md
     ├── index.html
-    ├── interface_PC.jpg
-    └── interface_mobile.jpg
+    └── interface.jpg
 ```
 
 Next, you can now test the website locally or explore it online. 
@@ -54,23 +53,9 @@ Next, you can now test the website locally or explore it online.
     ```
     in your browser (Please check if YOUR PORT NUMBER is 8080 or not. If not, replace 8080 by **YOUR PORT NUMBER**).
 
-Now, you should be able to access and use our interactive website to select conditions from categorization or enter paper information to filter results from our systematic review. 
-<div style="display: flex; gap: 20px; margin-bottom: 20px; text-align: center;">
-    <div style="flex: 0.7;">
-        <li>An example image of PC interfaces:</li>
-        <img title="PC interfaces example image of our interactive website" 
-             alt="An example image of our interactive website interface on PCs" 
-             src="interface_PC.jpg" 
-             style="width: 100%; height: auto;">
-    </div>
-    <div style="flex: 0.5;">
-        <li>An example image of mobile interfaces:</li>
-        <img title="Mobile interfaces example image of our interactive website" 
-             alt="An example image of our interactive website interface on mobile devices" 
-             src="interface_mobile.jpg" 
-             style="width: 39%; height: auto;">
-    </div>
-</div>
+Now, you should be able to access and use our interactive website to select conditions from categorization or enter paper information to filter results from our systematic review. Here is an example image of our interactive website interfaces:
+
+<img title="PC interfaces example image of our interactive website" alt="An example image of our interactive website interface on PCs" src="interface_PC.jpg">
 
 ## Updating in progress
 This repository will be updated upon the official publication of the paper in the IEEE VIS 2025 proceedings. Stay tuned for the final version.
