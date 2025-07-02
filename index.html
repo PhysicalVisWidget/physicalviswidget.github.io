@@ -78,12 +78,10 @@
     }
 
     .header-container {
-      position: fixed;
       top: 0; left: 0; width: 100%;
       background: var(--bg);
       z-index: 9999;
       padding-bottom: 12px;
-      box-shadow: 0 6px 14px rgba(0,0,0,.04);
     }
     .header { text-align: center; padding: 18px 10px 12px; }
     .header h1 { font-size: 1.8rem; font-weight: 700; margin: 0; }
@@ -120,19 +118,33 @@
       width: 100%;
     }
     .layout-outer {
-      display: flex; flex-wrap: wrap; justify-content: space-between;
-      width: 95%; margin: 0 auto;
+      display: flex; 
+      flex-wrap: wrap; 
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%; 
+      margin: 0; 
     }
-    .left-gap, .middle-gap, .right-gap { flex: 1 1 5%; max-width: 5%; }
 
-    .results-table-container { flex: 1 1 65%; display: flex; flex-direction: column; gap: 20px; }
+    .results-table-container {
+      position: absolute;
+      left: 5%;
+      width: 60%;
+      flex: none;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
     .card {
       background: var(--elevated);
       border-radius: var(--radius-lg);
       box-shadow: 9px 9px 16px var(--shadow-dark),
                   -9px -9px 16px var(--shadow-light);
-      padding: 20px; /* 修改此处，将16px改为20px以匹配Contact页面卡片内边距 */
-      display: flex; align-items: center; gap: 5%;
+      padding: 20px; 
+      display: flex; 
+      align-items: center; 
+      gap: 5%;
       height: auto; 
       overflow: hidden;
       position: relative;
@@ -218,16 +230,24 @@
     }
 
     .filter-bar {
-      flex: 1 1 20%; background: var(--elevated);
+      position: fixed; 
+      right: 5%; 
+      width: 25%; 
+      top: 10px;
+      max-height: calc(100vh - 20px); 
+      height: auto; 
+      margin: 0;
+      background: var(--elevated);
       border-radius: var(--radius-lg);
       padding: 22px;
       box-shadow: 9px 9px 16px var(--shadow-dark),
                   -9px -9px 16px var(--shadow-light);
-      height: fit-content; min-width: 200px;
-    }
+      overflow-y: auto; 
+  }
 
     .filter-bar.sticky {
       position: sticky;
+      top: 10px;
       overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: var(--txt-secondary) transparent;
@@ -347,24 +367,26 @@
       }
 
       .layout-outer {
-        flex-direction: column;
-        align-items: center;
+        display: block;
         width: 100%;
-        display: flex;
-      }
-
-      .results-table-container,
-      .filter-bar {
-        width: 95% !important;
+        margin: 0;
       }
 
       .filter-bar {
-        padding: 14px;
-        order: -1; 
+        order: 1;
         position: static !important; 
-        height: auto !important;   
-        top: auto !important;       
-        overflow: visible !important; 
+        width: 90% !important; 
+        max-height: 40vh !important; 
+        margin: 10px auto !important; 
+        right: auto !important; 
+      }
+
+      .results-table-container {
+        order: 2;
+        width: 90% !important; 
+        margin: 10px auto !important;
+        left: auto !important;
+        position: relative !important; 
       }
 
       .filter-bar h3,
@@ -398,6 +420,19 @@
 
       .card-content {
         width: 100%;
+        overflow: visible; 
+        display: block;
+        -webkit-line-clamp: none;
+      }
+
+      .card-text {
+        overflow: visible; 
+        display: block;
+        -webkit-line-clamp: none;
+      }
+
+      .results-table-container.exploration-active .card {
+        height: auto; 
       }
 
       .card-index {
@@ -505,9 +540,7 @@
       <button class="neu-flat" data-tab="home"><span class="icon-placeholder">🏠</span>Home</button>
       <button class="neu-flat" data-tab="explore"><span class="icon-placeholder">🔭</span>Exploration</button>
       <button class="neu-flat" data-link="Resources/Designing_Visualization_Widgets_for_Tangible_Data_Exploration_A_Systematic_Review.pdf"><span class="icon-placeholder">📄</span>Paper</button>
-      <button class="neu-flat" onclick="window.open('https\:', '_blank')">
-        <span class="icon-placeholder"><img src="Resources/Icons/doi.png" style="height:1em; vertical-align:middle;"></span>DOI
-      </button>
+      <button class="neu-flat" data-link="https://doi.org/10.48550/arXiv.2507.00775"><span class="icon-placeholder"><img src="Resources/Icons/doi.png" style="height:1em; vertical-align:middle;"></span>DOI</button>
       <button class="neu-flat" id="citationBtn">
         <span class="icon-placeholder"><img src="Resources/Icons/bibtex.png" style="height:1em; vertical-align:middle; margin-right:6px;"></span>Citation
       </button>
@@ -705,7 +738,7 @@
       explore.style.display = 'none';
       text.style.display    = 'none';
       contact.style.display = 'none';
-      filterBar.classList.remove('sticky');
+      filterBar.classList.add('sticky');
       resultsContainer.classList.remove('exploration-active');
 
       if (tabName === 'Home') {
@@ -713,8 +746,8 @@
       } else if (tabName === 'Exploration') {
         explore.style.display = 'flex';
         document.querySelectorAll('.filter-select').forEach(select => toggleSelectStyle(select));
-        filterBar.classList.add('sticky');
         updateFilterBarPosition();
+        setupFilterBarScroll();
         resultsContainer.classList.add('exploration-active');
       } else if (tabName === 'Contact') {
         contact.style.display = 'block';
@@ -1171,7 +1204,7 @@
       const header = document.querySelector('.header-container');
       const contentWrapper = document.querySelector('.content-wrapper');
       if (header && contentWrapper) {
-        const offset = header.offsetHeight + 20; 
+        const offset = 10; 
         contentWrapper.style.marginTop = offset + 'px';
       }
     }
@@ -1203,13 +1236,12 @@
     window.addEventListener('resize', updateContentOffset);
 
     function updateFilterBarPosition() {
-      const headerHeight = document.querySelector('.header-container').offsetHeight;
-      const filterBar = document.querySelector('.filter-bar.sticky');
-      if (filterBar) {
-        filterBar.style.top = `${headerHeight}px`;
-        filterBar.style.height = `calc(100vh - ${headerHeight}px)`;
-      }
-    }
+  const headerHeight = document.querySelector('.header-container').offsetHeight;
+  const filterBar = document.querySelector('.filter-bar.sticky');
+  if (filterBar) {
+    filterBar.style.top = `${headerHeight}px`;
+  }
+}
 
     window.addEventListener('load', updateFilterBarPosition);
     window.addEventListener('resize', updateFilterBarPosition);
@@ -1297,6 +1329,55 @@
       document.body.appendChild(message);
     }
 
+    function setupFilterBarScroll() {
+    const filterBar = document.querySelector('.filter-bar');
+    const resultsContainer = document.getElementById('resultsContainer');
+    let filterBarOffsetTop = 0;
+    let maxScrollTop = 0;
+
+    function initPositions() {
+        if (window.innerWidth <= 900) {
+            filterBar.style.position = 'static';
+            filterBar.style.top = 'auto';
+            filterBar.style.height = 'auto';
+            filterBar.style.width = '';
+            return;
+        }
+
+        requestAnimationFrame(() => {
+            const resultsRect = resultsContainer.getBoundingClientRect();
+            filterBarOffsetTop = resultsRect.top + window.scrollY;
+            maxScrollTop = filterBarOffsetTop - 10;
+
+            filterBar.style.position = 'fixed';
+            
+            const scrollY = window.scrollY;
+            filterBar.style.top = scrollY >= maxScrollTop ? '10px' : (filterBarOffsetTop - scrollY) + 'px';
+        });
+    }
+
+    function handleScroll() {
+        if (window.innerWidth <= 900) return;
+
+        const scrollY = window.scrollY;
+        const newTop = scrollY >= maxScrollTop ? '10px' : (filterBarOffsetTop - scrollY) + 'px';
+        filterBar.style.top = newTop;
+    }
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', initPositions);
+    initPositions();
+}
+
+    function finalizeSetup() {
+      setupFilterBarScroll(); 
+      updateFilterBarPosition(); 
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCSVData().then(finalizeSetup); 
+    });
+
   </script>
 
   <div id="citationCard" class="floating-card text-content" style="width: 60%; max-width: 60%; left: 20%; top: 25%; position: fixed; z-index: 9999; display: none;">
@@ -1316,18 +1397,19 @@
       box-shadow: 6px 6px 10px var(--shadow-dark),
                   -6px -6px 10px var(--shadow-light);
     ">
-      @inproceedings{Yao:2025:VisWidgets,
-      TITLE = {{Designing Visualization Widgets for Tangible Data Exploration: A Systematic Review}}, 
-      AUTHOR = {Haonan Yao, Lingyun Yu, Lijie Yao},
-      URL = {},
-      NOTE = {early access},
-      BOOKTITLE = {{Short papers of the IEEE Visualization and Visual Analytics (VIS)}},
-      ADDRESS = {Los Alamitos, CA, USA, United States},
-      YEAR = {2025},
-      MONTH = Nov,
-      DOI = {},
-      KEYWORDS = {visualization widget ; tangible interaction ; data exploration},
+      @INPROCEEDINGS{Yao:2025:VisWidgets,
+        author={Yao, Haonan and Yu, Lingyun and Yao, Lijie},
+        booktitle={2025 IEEE Visualization Conference (VIS)}, 
+        title={Designing Visualization Widgets for Tangible Data Exploration: A Systematic Review}, 
+        year={2025},
+        volume={},
+        number={},
+        pages={},
+        keywords={Visualization widget;Tangible interaction;Data exploration},
+        note={early access},
+        doi={}
       }
+
     </pre>
     <button onclick="copyBibtex()" class="reset-btn" style="position: absolute; right: 20px; bottom: 20px;">Copy</button>
   </div>
