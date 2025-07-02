@@ -454,12 +454,16 @@
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
         width: 90% !important;
-        max-width: 300px !important;
+        max-width: 500px !important;
         padding: 15px !important;
         z-index: 99999 !important;
         max-height: 70vh !important; 
         overflow-y: auto !important; 
         -webkit-overflow-scrolling: touch !important; 
+        background: var(--elevated);
+        box-shadow: 6px 6px 14px var(--shadow-dark), -6px -6px 14px var(--shadow-light);
+        border-radius: var(--radius-lg);
+        display: none;
       }
 
       #citationCard p {
@@ -485,23 +489,6 @@
 
     .icon-link {
       text-decoration: none;
-    }
-
-    #citationCard {
-      position: fixed;
-      top: 80px;
-      right: 40px;
-      z-index: 99999;
-      background: var(--elevated);
-      box-shadow: 6px 6px 14px var(--shadow-dark), -6px -6px 14px var(--shadow-light);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      display: none;
-    }
-
-    #citationCard {
-      left: 50% !important;
-      transform: translateX(-50%) !important;
     }
 
     #citationBtn .icon-placeholder {
@@ -1407,7 +1394,7 @@
         pages={},
         keywords={Visualization widget;Tangible interaction;Data exploration},
         note={early access},
-        doi={}
+        doi={10.48550/arXiv.2507.00775}
       }
 
     </pre>
