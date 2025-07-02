@@ -32,7 +32,9 @@ To begin, either clone this repository or if you stay within GitHub, use the ''u
 └── Main directory
     ├── Resources
     ├── README.md
-    └── index.html
+    ├── index.html
+    ├── interface_PC.jpg
+    └── interface_mobile.jpg
 ```
 
 Next, you can now test the website locally or explore it online. 
